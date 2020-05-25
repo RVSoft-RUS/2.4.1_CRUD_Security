@@ -2,6 +2,7 @@ package web.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
@@ -171,8 +172,14 @@ public class UsersController {
 		return "raw data";
 	}
 
-	@RequestMapping(value = "login", method = RequestMethod.GET)
-	public String loginPage() {
+	@RequestMapping("/login")
+	public String loginPage(@RequestParam(name = "error", required = false) boolean error,
+							Model model) {
+		if (Boolean.TRUE.equals(error)) {
+			List<String> messages = new ArrayList<>();
+			messages.add("Error! Bad credentials!");
+			model.addAttribute("messages", messages);
+		}
 		return "login";
 	}
 }

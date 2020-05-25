@@ -1,5 +1,6 @@
 package web.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -10,23 +11,32 @@ import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import web.config.handler.LoginSuccessHandler;
+import web.security.AuthProviderImpl;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
+    @Autowired
+    private AuthProviderImpl authProvider;
 
     @Override
     public void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.inMemoryAuthentication().withUser("ADMIN").password("ADMIN").roles("ADMIN");
         auth.inMemoryAuthentication().withUser("A").password("A").roles("ADMIN");
         auth.inMemoryAuthentication().withUser("u").password("u").roles("USER");
+        /**
+         * Привязываем наш {@link AuthProviderImpl}
+         */
+        auth.authenticationProvider(authProvider);
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+//Правила доступа к частям нашего приложения
         http.formLogin()
                 // указываем страницу с формой логина
                 .loginPage("/login")
+
                 //указываем логику обработки при логине
                 .successHandler(new LoginSuccessHandler())
                 // указываем action с формы логина
@@ -35,7 +45,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .usernameParameter("j_username")
                 .passwordParameter("j_password")
                 // даем доступ к форме логина всем
-                .permitAll();
+//                .permitAll()
+                //При неудачном логине
+                .failureUrl("/login?error=true")
+
+                .and()
+                .exceptionHandling()
+                .accessDeniedPage("/admin/users");
+
+
 
         http.logout()
                 // разрешаем делать логаут всем
@@ -44,6 +62,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
                 // указываем URL при удачном логауте
                 .logoutSuccessUrl("/login?logout")
+
+
                 //выклчаем кроссдоменную секьюрность (на этапе обучения неважна)
                 .and().csrf().disable();
 
@@ -53,7 +73,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 //страницы аутентификаци доступна всем
                 .antMatchers("/login").anonymous()
                 // защищенные URL
-                .antMatchers("/admin/**").access("hasAnyRole('ADMIN')").anyRequest().authenticated();
+                //Для всех кто прошет аутентификацию
+                .antMatchers("/admin").authenticated();
+
+                //Так сделано в примере
+//                .antMatchers("/admin/**").access("hasAnyRole('ADMIN')").anyRequest().authenticated();
+
 //                .antMatchers("/user/**").access("hasAnyRole('USER')").anyRequest().authenticated();
 //                .antMatchers("/admin/**").hasAuthority("ADMIN")
 //                .antMatchers("/user/**").hasAnyAuthority("USER");
