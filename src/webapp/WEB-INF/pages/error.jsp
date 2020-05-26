@@ -12,6 +12,7 @@
     <title>Message</title>
 </head>
 <body>
+<%@include file="/WEB-INF/header.jsp"%>
 <h2>
     <c:out value='${errorText}' />
 </h2>

@@ -4,6 +4,7 @@
     <title>Add new user</title>
 </head>
 <body>
+<%@include file="/WEB-INF/header.jsp"%>
 <form action="${pageContext.request.contextPath}/admin/add" method="post">
     <table border="0" cellpadding="5">
         <tr>

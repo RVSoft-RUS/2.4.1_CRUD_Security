@@ -6,6 +6,7 @@
     <title>All users</title>
 </head>
 <body>
+<%@include file="/WEB-INF/header.jsp"%>
 <div align="center">
     <table border="1" cellpadding="5">
         <caption><h2>List of Users</h2></caption>

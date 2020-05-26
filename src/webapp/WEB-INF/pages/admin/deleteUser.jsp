@@ -5,6 +5,7 @@
     <title>Delete user</title>
 </head>
 <body>
+<%@include file="/WEB-INF/header.jsp"%>
 <div align="center">
     <h2>Users Management - Delete user</h2>
 </div>

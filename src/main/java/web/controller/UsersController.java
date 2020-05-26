@@ -1,12 +1,16 @@
 package web.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
+import web.model.Role;
 import web.model.User;
+import web.service.RoleService;
 import web.service.UserService;
 
 import javax.servlet.RequestDispatcher;
@@ -16,10 +20,12 @@ import java.util.*;
 @RequestMapping("/")
 public class UsersController {
 	private final UserService userService;
+	private final RoleService roleService;
 
 	@Autowired
-	public UsersController(UserService userService) {
+	public UsersController(UserService userService, RoleService roleService) {
 		this.userService = userService;
+		this.roleService = roleService;
 	}
 
 	@RequestMapping(value = "hello", method = RequestMethod.GET)
@@ -42,6 +48,8 @@ public class UsersController {
 
 	@RequestMapping(value = "user", method = RequestMethod.GET)
 	public String userInfo(ModelMap model) {
+		User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		model.addAttribute("user", user);
 		return "user/userInfo";
 	}
 
@@ -77,7 +85,17 @@ public class UsersController {
 				model.addAttribute("errorText", "Incorrect user fields.");
 				return "error";
 			}
-			User user = new User(id, login, password, role, name, surname, age);
+
+			Set<Role> roles = new HashSet<>();
+			if (role != null && role.equals("user")) {
+				roles.add(roleService.getRoleByName("USER"));
+			}
+			if (role != null && role.equals("admin")) {
+				roles.add(roleService.getRoleByName("ADMIN"));
+				roles.add(roleService.getRoleByName("USER"));
+			}
+
+			User user = new User(id, login, password, role, name, surname, age, roles);
 			if (!userService.updateUser(user)) {
 				model.addAttribute("errorText", "Error while processing user edit.");
 				return "error";
@@ -118,7 +136,16 @@ public class UsersController {
 			int age = Integer.parseInt(Objects.requireNonNull(webRequest.getParameter("age")));
 			long id = Integer.parseInt(Objects.requireNonNull(webRequest.getParameter("id")));
 
-			User user = new User(id, login, password, role, name, surname, age);
+			Set<Role> roles = new HashSet<>();
+			if (role != null && role.equals("user")) {
+				roles.add(roleService.getRoleByName("USER"));
+			}
+			if (role != null && role.equals("admin")) {
+				roles.add(roleService.getRoleByName("ADMIN"));
+				roles.add(roleService.getRoleByName("USER"));
+			}
+
+			User user = new User(id, login, password, role, name, surname, age, roles);
 			if (!userService.deleteUser(user)) {
 				model.addAttribute("errorText", "Error while processing user edit.");
 				return "error";
@@ -153,7 +180,16 @@ public class UsersController {
 				model.addAttribute("errorText", "User with same login already exist.");
 				return "error";
 			}
-			User user = new User(login, password, role, name, surname, age);
+			Set<Role> roles = new HashSet<>();
+			if (role != null && role.equals("user")) {
+				roles.add(roleService.getRoleByName("USER"));
+			}
+			if (role != null && role.equals("admin")) {
+				roles.add(roleService.getRoleByName("ADMIN"));
+				roles.add(roleService.getRoleByName("USER"));
+			}
+
+			User user = new User(login, password, role, name, surname, age, roles);
 			if (!userService.addUser(user)) {
 				model.addAttribute("errorText", "Error while processing user edit.");
 				return "error";

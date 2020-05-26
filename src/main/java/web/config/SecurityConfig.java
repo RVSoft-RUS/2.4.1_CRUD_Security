@@ -36,7 +36,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.formLogin()
                 // указываем страницу с формой логина
                 .loginPage("/login")
-
                 //указываем логику обработки при логине
                 .successHandler(new LoginSuccessHandler())
                 // указываем action с формы логина
@@ -47,14 +46,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 // даем доступ к форме логина всем
 //                .permitAll()
                 //При неудачном логине
-                .failureUrl("/login?error=true")
-
-                .and()
-                .exceptionHandling()
-                .accessDeniedPage("/admin/users");
-
-
-
+                .failureUrl("/login?error=true");
+//
+//                .and()
+//                .exceptionHandling()
+//                .accessDeniedPage("/admin/users");
         http.logout()
                 // разрешаем делать логаут всем
                 .permitAll()
@@ -62,8 +58,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
                 // указываем URL при удачном логауте
                 .logoutSuccessUrl("/login?logout")
-
-
                 //выклчаем кроссдоменную секьюрность (на этапе обучения неважна)
                 .and().csrf().disable();
 
@@ -73,15 +67,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 //страницы аутентификаци доступна всем
                 .antMatchers("/login").anonymous()
                 // защищенные URL
-                //Для всех кто прошет аутентификацию
-                .antMatchers("/admin").authenticated();
-
-                //Так сделано в примере
-//                .antMatchers("/admin/**").access("hasAnyRole('ADMIN')").anyRequest().authenticated();
-
-//                .antMatchers("/user/**").access("hasAnyRole('USER')").anyRequest().authenticated();
-//                .antMatchers("/admin/**").hasAuthority("ADMIN")
-//                .antMatchers("/user/**").hasAnyAuthority("USER");
+                .antMatchers("/admin/**").hasAuthority("ADMIN")
+                .antMatchers("/user/**").hasAnyAuthority("USER");
     }
 
     @Bean

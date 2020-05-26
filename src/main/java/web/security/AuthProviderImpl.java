@@ -10,6 +10,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import web.model.User;
+import web.service.RoleService;
 import web.service.UserService;
 
 import java.util.ArrayList;
@@ -19,6 +20,8 @@ import java.util.List;
 public class AuthProviderImpl implements AuthenticationProvider {
     @Autowired
     private UserService userService;
+    @Autowired
+    private RoleService roleService;
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
@@ -34,8 +37,18 @@ public class AuthProviderImpl implements AuthenticationProvider {
             throw new BadCredentialsException("Bad Credentials");
         }
         List<GrantedAuthority> authorities = new ArrayList<>();
+
+        String role = user.getRole();
+        if (role != null && role.equals("user")) {
+            authorities.add(roleService.getRoleByName("USER"));
+        }
+        if (role != null && role.equals("admin")) {
+            authorities.add(roleService.getRoleByName("ADMIN"));
+            authorities.add(roleService.getRoleByName("USER"));
+        }
         //Пока разрешаем всем, пох
-        return new UsernamePasswordAuthenticationToken(user, null, authorities);
+        //todo Change to correct
+        return new UsernamePasswordAuthenticationToken(user, password, authorities);
     }
 
     @Override

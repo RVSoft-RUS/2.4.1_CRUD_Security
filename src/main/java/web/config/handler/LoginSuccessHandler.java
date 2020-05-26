@@ -1,6 +1,7 @@
 package web.config.handler;
 
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
@@ -8,6 +9,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 @Component
 public class LoginSuccessHandler implements AuthenticationSuccessHandler {
@@ -16,6 +20,18 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
     public void onAuthenticationSuccess(HttpServletRequest httpServletRequest,
                                         HttpServletResponse httpServletResponse,
                                         Authentication authentication) throws IOException, ServletException {
-        httpServletResponse.sendRedirect("/admin/users");
+//        httpServletResponse.sendRedirect("/admin/users");
+        //todo Check here
+        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+        List<String> roles = new ArrayList<String>();
+        for (GrantedAuthority a : authorities) {
+            roles.add(a.getAuthority());
+        }
+        if (roles.contains("ADMIN")) {
+            httpServletResponse.sendRedirect("/admin/users");
+        } else {
+            // TODO: 26.05.2020 Wrong redirect ?
+            httpServletResponse.sendRedirect("/user");
+        }
     }
 }
