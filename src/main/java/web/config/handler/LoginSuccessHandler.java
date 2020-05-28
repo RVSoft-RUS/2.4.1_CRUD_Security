@@ -20,8 +20,6 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
     public void onAuthenticationSuccess(HttpServletRequest httpServletRequest,
                                         HttpServletResponse httpServletResponse,
                                         Authentication authentication) throws IOException, ServletException {
-//        httpServletResponse.sendRedirect("/admin/users");
-        //todo Check here
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         List<String> roles = new ArrayList<String>();
         for (GrantedAuthority a : authorities) {
@@ -29,8 +27,7 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
         }
         if (roles.contains("ADMIN")) {
             httpServletResponse.sendRedirect("/admin/users");
-        } else {
-            // TODO: 26.05.2020 Wrong redirect ?
+        } else if (roles.contains("USER")){
             httpServletResponse.sendRedirect("/user");
         }
     }

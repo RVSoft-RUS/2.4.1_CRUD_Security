@@ -1,8 +1,8 @@
 package web.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
@@ -13,7 +13,6 @@ import web.model.User;
 import web.service.RoleService;
 import web.service.UserService;
 
-import javax.servlet.RequestDispatcher;
 import java.util.*;
 
 @Controller
@@ -21,11 +20,13 @@ import java.util.*;
 public class UsersController {
 	private final UserService userService;
 	private final RoleService roleService;
+	private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
 	@Autowired
-	public UsersController(UserService userService, RoleService roleService) {
+	public UsersController(UserService userService, RoleService roleService, BCryptPasswordEncoder bCryptPasswordEncoder) {
 		this.userService = userService;
 		this.roleService = roleService;
+		this.bCryptPasswordEncoder = bCryptPasswordEncoder;
 	}
 
 	@RequestMapping(value = "hello", method = RequestMethod.GET)
@@ -39,8 +40,7 @@ public class UsersController {
 	}
 
 	@RequestMapping(value = "admin/users", method = RequestMethod.GET)
-	public String printUsers(@RequestParam(value = "locale", required = false,
-			defaultValue = "ru") String locale, ModelMap model) {
+	public String printUsers(ModelMap model) {
 		List<User> userList = userService.getAllUsers();
 		model.addAttribute("userList", userList);
 		return "admin/users";
@@ -80,6 +80,7 @@ public class UsersController {
 			long id = Integer.parseInt(Objects.requireNonNull(webRequest.getParameter("id")));
 			String login =  webRequest.getParameter("login");
 			String password =  webRequest.getParameter("password");
+			password = bCryptPasswordEncoder.encode(password);
 			String role =  webRequest.getParameter("role");
 			if (name.isEmpty() || surname.isEmpty() || age < 0 || age > 150) {
 				model.addAttribute("errorText", "Incorrect user fields.");

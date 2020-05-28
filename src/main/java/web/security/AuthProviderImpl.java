@@ -8,6 +8,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 import web.model.User;
 import web.service.RoleService;
@@ -22,18 +23,18 @@ public class AuthProviderImpl implements AuthenticationProvider {
     private UserService userService;
     @Autowired
     private RoleService roleService;
+    @Autowired
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        //Логин, который передали в форме
         String login = authentication.getName();
         User user = userService.getUserByLogin(login);
         if (user == null) {
             throw new UsernameNotFoundException("User not found");
         }
-        //Пароль, который передали в форме
         String password = authentication.getCredentials().toString();
-        if (!password.equals(user.getPassword())) {
+        if (!bCryptPasswordEncoder.matches(password, user.getPassword())) {
             throw new BadCredentialsException("Bad Credentials");
         }
         List<GrantedAuthority> authorities = new ArrayList<>();
@@ -44,10 +45,7 @@ public class AuthProviderImpl implements AuthenticationProvider {
         }
         if (role != null && role.equals("admin")) {
             authorities.add(roleService.getRoleByName("ADMIN"));
-            authorities.add(roleService.getRoleByName("USER"));
         }
-        //Пока разрешаем всем, пох
-        //todo Change to correct
         return new UsernamePasswordAuthenticationToken(user, password, authorities);
     }
 

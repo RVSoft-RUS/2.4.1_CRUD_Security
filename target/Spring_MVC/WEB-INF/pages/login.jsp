@@ -2,7 +2,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jstl/core_rt" %>
 <html>
 <head>
-    <title>Title</title>
+    <title>Login Window</title>
 </head>
 <body>
 

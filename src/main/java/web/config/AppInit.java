@@ -7,13 +7,6 @@ import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatche
 import javax.servlet.Filter;
 //@Order(1)
 public class AppInit extends AbstractAnnotationConfigDispatcherServletInitializer {
-    @Override
-    protected Filter[] getServletFilters() {
-        CharacterEncodingFilter characterEncodingFilter = new CharacterEncodingFilter();
-        characterEncodingFilter.setEncoding("UTF-8");
-        return new Filter[]{characterEncodingFilter};
-    }
-
     // Метод, указывающий на класс конфигурации
     @Override
     protected Class<?>[] getRootConfigClasses() {
@@ -30,11 +23,18 @@ public class AppInit extends AbstractAnnotationConfigDispatcherServletInitialize
         };
     }
 
-
     /* Данный метод указывает url, на котором будет базироваться приложение */
     @Override
     protected String[] getServletMappings() {
         return new String[]{"/"};
     }
+
+    @Override
+    protected Filter[] getServletFilters() {
+        CharacterEncodingFilter characterEncodingFilter = new CharacterEncodingFilter();
+        characterEncodingFilter.setEncoding("UTF-8");
+        return new Filter[]{characterEncodingFilter};
+    }
+
 
 }

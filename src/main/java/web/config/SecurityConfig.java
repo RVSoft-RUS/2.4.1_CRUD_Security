@@ -1,12 +1,15 @@
 package web.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -18,16 +21,20 @@ import web.security.AuthProviderImpl;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private AuthProviderImpl authProvider;
+    @Autowired
+    @Qualifier("userDetailsServiceImpl")
+    private UserDetailsService userDetailsService;
+    @Autowired
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Override
     public void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.inMemoryAuthentication().withUser("ADMIN").password("ADMIN").roles("ADMIN");
-        auth.inMemoryAuthentication().withUser("A").password("A").roles("ADMIN");
-        auth.inMemoryAuthentication().withUser("u").password("u").roles("USER");
         /**
          * Привязываем наш {@link AuthProviderImpl}
          */
-        auth.authenticationProvider(authProvider);
+//        auth.authenticationProvider(authProvider);
+        auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder);
+//        auth.userDetailsService(userDetailsService).passwordEncoder(NoOpPasswordEncoder.getInstance());
     }
 
     @Override
@@ -68,11 +75,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/login").anonymous()
                 // защищенные URL
                 .antMatchers("/admin/**").hasAuthority("ADMIN")
-                .antMatchers("/user/**").hasAnyAuthority("USER");
+                .antMatchers("/user/**").hasAnyAuthority("USER", "ADMIN");
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return NoOpPasswordEncoder.getInstance();
+    public BCryptPasswordEncoder getPassEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }

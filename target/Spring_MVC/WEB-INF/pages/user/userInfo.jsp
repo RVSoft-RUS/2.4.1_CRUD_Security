@@ -5,6 +5,7 @@
     <title>User Info</title>
 </head>
 <body>
+<%@include file="/WEB-INF/header.jsp"%>
     <table border="0" cellpadding="5">
         <tr>
             <td><label>ID:</label></td>
